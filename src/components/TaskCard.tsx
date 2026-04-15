@@ -31,7 +31,7 @@ export default function TaskCard({ task, onDelete, onClick }: Props) {
       </div>
 
       {task.description && (
-        <p className="text-xs text-slate-500 mb-3 line-clamp-2">{task.description}</p>
+        <p className="text-xs text-slate-500 mb-3 line-clamp-3">{task.description}</p>
       )}
 
       <div className="flex flex-wrap gap-1 mb-3">
