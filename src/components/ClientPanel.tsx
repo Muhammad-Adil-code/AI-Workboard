@@ -75,7 +75,7 @@ export default function ClientPanel({ clients, onAdd, onUpdate, onDelete }: Prop
                 </span>
                 <button
                   onClick={() => onDelete(c._id)}
-                  className="text-slate-300 hover:text-red-500 transition-colors"
+                  className="text-slate-400 hover:text-red-500 transition-colors"
                   title="Delete client"
                 >
                   <Trash2 size={13} />
