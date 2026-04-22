@@ -51,7 +51,7 @@ export default function InsightsModal({ onClose }: Props) {
                 <button
                   key={p.key}
                   onClick={() => setPeriod(p.key)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                     period === p.key
                       ? 'bg-white text-indigo-600 shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
