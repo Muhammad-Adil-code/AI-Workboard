@@ -108,8 +108,8 @@ export default function InsightsModal({ onClose }: Props) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }} />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 11 }} />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="created" name="Created" stroke="#818cf8" strokeWidth={2} fill="url(#gradCreated)" />
                   <Area type="monotone" dataKey="completed" name="Completed" stroke="#34d399" strokeWidth={2} fill="url(#gradCompleted)" />
                 </AreaChart>
@@ -129,8 +129,8 @@ export default function InsightsModal({ onClose }: Props) {
                         <Cell key={i} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }} />
-                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 11 }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -143,7 +143,7 @@ export default function InsightsModal({ onClose }: Props) {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 11 }} />
                     <Bar dataKey="value" name="Tasks" radius={[6, 6, 0, 0]}>
                       {data.priorityBreakdown.map((entry: any, i: number) => (
                         <Cell key={i} fill={entry.color} />
@@ -163,8 +163,8 @@ export default function InsightsModal({ onClose }: Props) {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} />
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }} />
-                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 11 }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                     <Bar dataKey="estimated" name="Estimated" fill="#818cf8" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="actual" name="Actual" fill="#34d399" radius={[4, 4, 0, 0]} />
                   </BarChart>
