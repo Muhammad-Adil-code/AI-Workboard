@@ -135,7 +135,7 @@ export default function AddTaskModal({ clients, onClose, onAdd, defaultStatus = 
                   onClick={handleEstimate}
                   disabled={!title || estimating}
                   className="shrink-0 px-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-600 hover:bg-indigo-100 disabled:opacity-40"
-                  title="AI estimate"
+                  title="Let AI estimate duration"
                 >
                   {estimating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                 </button>
