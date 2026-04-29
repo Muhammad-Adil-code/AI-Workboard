@@ -24,7 +24,7 @@ async function seed() {
   const clients = await Client.insertMany([
     { name: 'Sarah Mitchell', email: 'sarah@brightwave.io', company: 'BrightWave Agency', color: '#8b5cf6', invoiceStatus: 'paid', totalEarned: 5200 },
     { name: 'James Okafor', email: 'james@novalabs.co', company: 'Nova Labs', color: '#6366f1', invoiceStatus: 'sent', totalEarned: 3100 },
-    { name: 'Priya Sharma', email: 'priya@shopzen.com', company: 'ShopZen', color: '#10b981', invoiceStatus: 'unpaid', totalEarned: 1200 },
+    { name: 'Priya Sharma', email: 'priya@shopzen.com', company: 'ShopZen', color: '#10b981', invoiceStatus: 'unpaid', totalEarned: 1800 },
   ])
 
   const [sarah, james, priya] = clients
