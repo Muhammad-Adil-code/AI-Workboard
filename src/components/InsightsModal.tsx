@@ -81,7 +81,7 @@ export default function InsightsModal({ onClose }: Props) {
                 { icon: <CheckCircle2 size={16} />, label: 'Completed', value: data.summary.done, color: 'bg-green-50 text-green-600' },
                 { icon: <AlertCircle size={16} />, label: 'Overdue', value: data.summary.overdue, color: 'bg-red-50 text-red-600' },
                 { icon: <TrendingUp size={16} />, label: 'Completion', value: `${data.summary.completionRate}%`, color: 'bg-indigo-50 text-indigo-600' },
-                { icon: <Clock size={16} />, label: 'Hours Logged', value: `${data.summary.totalActual}h`, color: 'bg-amber-50 text-amber-600' },
+                { icon: <Clock size={16} />, label: 'Hours Tracked', value: `${data.summary.totalActual}h`, color: 'bg-amber-50 text-amber-600' },
               ].map((stat, i) => (
                 <div key={i} className={`rounded-xl p-4 ${stat.color}`}>
                   <div className="flex items-center gap-2 mb-1 opacity-70">{stat.icon}<span className="text-xs font-semibold">{stat.label}</span></div>
