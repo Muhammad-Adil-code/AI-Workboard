@@ -144,7 +144,7 @@ export default function Board() {
         <div className="flex-1 overflow-x-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <DragDropContext onDragEnd={handleDragEnd}>
