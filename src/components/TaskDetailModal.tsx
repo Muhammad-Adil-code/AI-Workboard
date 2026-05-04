@@ -46,7 +46,7 @@ export default function TaskDetailModal({ task, onClose, onUpdate }: Props) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
           <h2 className="text-base font-bold text-slate-800 flex-1 pr-4">{task.title}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Close task detail" className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
         </div>
 
         <div className="p-6 space-y-5">
