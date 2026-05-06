@@ -93,7 +93,7 @@ export default function InsightsModal({ onClose }: Props) {
             {/* Activity chart */}
             <div className="bg-slate-50 rounded-2xl p-5">
               <h3 className="text-sm font-bold text-slate-700 mb-4">Task Activity</h3>
-              <ResponsiveContainer width="100%" height={230}>
+              <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={data.activityData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gradCreated" x1="0" y1="0" x2="0" y2="1">
