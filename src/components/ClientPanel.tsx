@@ -42,7 +42,7 @@ export default function ClientPanel({ clients, onAdd, onUpdate, onDelete }: Prop
           onClick={() => setOpen(true)}
           className="flex items-center gap-1 text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700"
         >
-          <Plus size={12} /> Add
+          <Plus size={12} /> New
         </button>
       </div>
 
