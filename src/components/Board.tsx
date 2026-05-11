@@ -156,7 +156,7 @@ export default function Board() {
                     <div key={colId} className={`flex flex-col w-72 bg-white rounded-2xl border-t-4 ${config.color} shadow-sm`}>
                       <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
                         <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-slate-700 text-sm">{config.title}</span>
+                          <span className="font-bold text-slate-700 text-sm">{config.title}</span>
                           <span className="text-xs bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded-full">{colTasks.length}</span>
                         </div>
                         <button
