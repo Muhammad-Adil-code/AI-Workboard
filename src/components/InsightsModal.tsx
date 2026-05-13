@@ -144,7 +144,7 @@ export default function InsightsModal({ onClose }: Props) {
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} allowDecimals={false} />
                     <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 11 }} />
-                    <Bar dataKey="value" name="Tasks" radius={[8, 8, 0, 0]}>
+                    <Bar dataKey="value" name="Tasks" radius={[6, 6, 0, 0]}>
                       {data.priorityBreakdown.map((entry: any, i: number) => (
                         <Cell key={i} fill={entry.color} />
                       ))}
