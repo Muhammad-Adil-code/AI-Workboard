@@ -15,7 +15,7 @@ app.prepare().then(() => {
   })
 
   const io = new SocketIOServer(httpServer, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
+    cors: { origin: process.env.NEXT_PUBLIC_SOCKET_URL || '*', methods: ['GET', 'POST'] },
   })
 
   io.on('connection', (socket) => {
