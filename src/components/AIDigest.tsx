@@ -37,7 +37,7 @@ export default function AIDigest({ tasks, clients }: Props) {
         className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-all"
       >
         {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-        📊 Weekly Digest
+        Weekly Digest
       </button>
 
       {open && digest && (
@@ -45,7 +45,7 @@ export default function AIDigest({ tasks, clients }: Props) {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Sparkles size={16} className="text-indigo-500" /> 📊 Weekly Digest
+                <Sparkles size={16} className="text-indigo-500" /> Weekly Digest
               </h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
             </div>
