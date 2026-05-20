@@ -75,7 +75,7 @@ export default function InsightsModal({ onClose }: Props) {
           <div className="p-6 space-y-6">
 
             {/* Summary stats */}
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[
                 { icon: <BarChart2 size={16} />, label: 'Total Tasks', value: data.summary.total, color: 'bg-slate-50 text-slate-600' },
                 { icon: <CheckCircle2 size={16} />, label: 'Completed', value: data.summary.done, color: 'bg-green-50 text-green-600' },
