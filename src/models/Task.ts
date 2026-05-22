@@ -26,7 +26,7 @@ const TaskSchema = new Schema({
   tags: [String],
   subtasks: [SubtaskSchema],
   boardId: { type: String, default: 'default' },
-  order: { type: Number, default: Date.now },
+  order: { type: Number, default: 0 },
 }, { timestamps: true })
 
 export default mongoose.models.Task || mongoose.model('Task', TaskSchema)
