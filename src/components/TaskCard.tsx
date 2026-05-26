@@ -17,7 +17,7 @@ export default function TaskCard({ task, onDelete, onClick }: Props) {
 
   return (
     <div
-      className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
+      className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       onClick={() => onClick(task)}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
