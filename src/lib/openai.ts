@@ -6,7 +6,7 @@ export const openai = new OpenAI({
 
 export async function askGPT(prompt: string, system?: string): Promise<string> {
   const res = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4o',
     messages: [
       { role: 'system', content: system || 'You are a helpful AI assistant for a freelancer productivity app called WorkBoard.' },
       { role: 'user', content: prompt },
