@@ -106,7 +106,7 @@ export default function TaskDetailModal({ task, onClose, onUpdate }: Props) {
                   <button
                     key={s.id}
                     onClick={() => toggleSubtask(s.id)}
-                    className="w-full flex items-center gap-3 text-left hover:bg-slate-50 rounded-lg p-2 transition-colors"
+                    className="w-full flex items-center gap-3 text-left hover:bg-slate-50 rounded-lg p-2 transition-all duration-150"
                   >
                     {s.done
                       ? <CheckSquare size={16} className="text-indigo-500 shrink-0" />
