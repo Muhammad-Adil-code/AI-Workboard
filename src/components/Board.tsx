@@ -153,7 +153,7 @@ export default function Board() {
                   const config = STATUS_CONFIG[colId]
                   const colTasks = getColumnTasks(colId)
                   return (
-                    <div key={colId} className={`flex flex-col w-[288px] bg-white rounded-2xl border-t-4 ${config.color} shadow-sm`}>
+                    <div key={colId} className={`flex flex-col w-72 bg-white rounded-2xl border-t-4 ${config.color} shadow-sm`}>
                       <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-700 text-sm">{config.title}</span>
