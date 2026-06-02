@@ -11,7 +11,7 @@ export async function askGPT(prompt: string, system?: string): Promise<string> {
       { role: 'system', content: system || 'You are a helpful AI assistant for a freelancer productivity app called WorkBoard.' },
       { role: 'user', content: prompt },
     ],
-    max_tokens: 800,
+    max_tokens: 1024,
   })
   return res.choices[0]?.message?.content || ''
 }
