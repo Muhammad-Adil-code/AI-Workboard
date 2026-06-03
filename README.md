@@ -1,4 +1,6 @@
-# WorkBoard — AI-Powered Kanban for Freelancers
+# WorkBoard
+
+![MIT License](https://img.shields.io/badge/license-MIT-green) ![Next.js](https://img.shields.io/badge/Next.js-14-black) ![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991) — AI-Powered Kanban for Freelancers
 
 > A production-ready Kanban board built for freelancers who manage multiple clients. Unlike every other AI Kanban tool (which manages AI coding agents), WorkBoard helps **you** manage your own work — with AI as your assistant.
 
