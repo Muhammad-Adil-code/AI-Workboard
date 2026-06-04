@@ -9,10 +9,54 @@ async function execute(intent: Intent): Promise<string> {
 
   if (intent.type === 'greet') {
     const tasks = await Task.find({ boardId: 'default' })
-    const overdue = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done').length
-    const inProgress = tasks.filter(t => t.status === 'in-progress').length
+    const overdue = tasks.filter((t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done').length
+    const inProgress = tasks.filter((t: any) => t.status === 'in-progress').length
     if (overdue > 0) return `Hey! You have ${tasks.length} tasks, ${inProgress} in progress, and ${overdue} overdue. Let's get to work!`
     return `Hey! You have ${tasks.length} tasks and ${inProgress} in progress. Everything looks good!`
+  }
+
+  if (intent.type === 'how_are_you') {
+    const tasks = await Task.find({ boardId: 'default' })
+    const done = tasks.filter((t: any) => t.status === 'done').length
+    const replies = [
+      `I'm doing great, thanks for asking! I've been helping you track ${tasks.length} tasks and ${done} are already done. How about you?`,
+      `All good on my end! Your board is looking active with ${tasks.length} tasks. I'm ready to help whenever you need me.`,
+      `Feeling productive! You have ${tasks.length} tasks on your board. Ready to crush some of them today?`,
+    ]
+    return replies[Math.floor(tasks.length % replies.length)]
+  }
+
+  if (intent.type === 'who_are_you') {
+    return `I'm your WorkBoard voice assistant — a fully local AI built into this app. I help you manage your freelance tasks, clients, and projects using just your voice. No internet needed, no API keys, completely private.`
+  }
+
+  if (intent.type === 'what_can_you_do') {
+    return `I can do quite a lot! You can say things like: board summary, what's overdue, what's in progress, move the first task to done, add task with high priority, or tasks for a specific client. I also understand casual conversation, so just talk to me naturally!`
+  }
+
+  if (intent.type === 'thank_you') {
+    const replies = [
+      `You're welcome! Is there anything else I can help you with?`,
+      `Happy to help! Just say the word whenever you need me.`,
+      `Anytime! Your productivity is my priority.`,
+      `Of course! Keep up the great work on your projects!`,
+    ]
+    const tasks = await Task.find({ boardId: 'default' })
+    return replies[tasks.length % replies.length]
+  }
+
+  if (intent.type === 'joke') {
+    const jokes = [
+      `Why do programmers prefer dark mode? Because light attracts bugs! Speaking of bugs, do you have any in your task list?`,
+      `Why did the developer go broke? Because he used up all his cache! Anyway, how can I help you today?`,
+      `A task walks into a bar and says "I'll never get done". The bartender says "sounds like you need to be moved to in-progress". Want me to check your tasks?`,
+    ]
+    const tasks = await Task.find({ boardId: 'default' })
+    return jokes[tasks.length % jokes.length]
+  }
+
+  if (intent.type === 'confused') {
+    return `No worries! Here are some things you can ask me: say "board summary" to get an overview, "what's overdue" to check late tasks, "move the first task to done", or "add task: your task name here". Just speak naturally and I'll do my best!`
   }
 
   if (intent.type === 'get_summary') {
@@ -89,7 +133,13 @@ async function execute(intent: Intent): Promise<string> {
   }
 
   const raw = (intent as any).raw || ''
-  return `I heard "${raw}" but I'm not sure what to do. Try saying: "move the first task to in progress", "board summary", "what's overdue", or "add task: title here".`
+  const suggestions = [
+    `I heard you say "${raw}" but I'm not sure how to help with that. Try saying "board summary", "what's overdue", or "add task" followed by your task name.`,
+    `Hmm, I didn't quite catch what you need. You can ask me things like "what's in progress", "move a task", or "add a new task". What would you like to do?`,
+    `I heard "${raw}" — that's a bit outside what I know how to do right now. Try asking about your tasks or say "what can you do" to hear my full capabilities.`,
+  ]
+  const tasks = await Task.find({ boardId: 'default' }).limit(1)
+  return suggestions[tasks.length % suggestions.length]
 }
 
 export async function POST(req: NextRequest) {

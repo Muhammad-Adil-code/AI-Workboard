@@ -8,6 +8,13 @@ export type Intent =
   | { type: 'get_in_progress' }
   | { type: 'get_client_tasks'; clientName: string }
   | { type: 'greet' }
+  | { type: 'how_are_you' }
+  | { type: 'what_can_you_do' }
+  | { type: 'who_are_you' }
+  | { type: 'thank_you' }
+  | { type: 'good_job' }
+  | { type: 'confused' }
+  | { type: 'joke' }
   | { type: 'unknown'; raw: string }
 
 export const STATUS_MAP: Record<string, string> = {
@@ -78,6 +85,36 @@ export function parseIntent(raw: string): Intent {
   // Greet — only if nothing meaningful follows
   if (/^(hey|hi|hello|good morning|good evening|howdy|what'?s up|sup)\s*[!.?]?\s*$/.test(raw.toLowerCase().trim())) {
     return { type: 'greet' }
+  }
+
+  // How are you
+  if (/(how are you|how('?re| are) you doing|you good|how('?s| is) it going|you okay|are you okay|how do you feel)/.test(text)) {
+    return { type: 'how_are_you' }
+  }
+
+  // What can you do / help
+  if (/(what can you do|what are you capable|help me|what do you do|how do you work|what('?s| is) your purpose|what can i (say|ask)|what (commands|can i say))/.test(text)) {
+    return { type: 'what_can_you_do' }
+  }
+
+  // Who are you / what is this
+  if (/(who are you|what (is|are) you|what('?s| is) this|tell me about yourself|introduce yourself|what am i (talking|speaking) to)/.test(text)) {
+    return { type: 'who_are_you' }
+  }
+
+  // Thank you
+  if (/(thank|thanks|thank you|cheers|appreciate|good job|well done|nice|great|perfect|awesome|excellent|amazing|brilliant)/.test(text)) {
+    return { type: 'thank_you' }
+  }
+
+  // Joke
+  if (/(tell me a joke|say something funny|make me laugh|joke|funny)/.test(text)) {
+    return { type: 'joke' }
+  }
+
+  // Confused / doesn't understand
+  if (/(i don'?t understand|what do you mean|confused|i'?m lost|what|huh|pardon|say that again|repeat|what did you say)/.test(text)) {
+    return { type: 'confused' }
   }
 
   // Summary
