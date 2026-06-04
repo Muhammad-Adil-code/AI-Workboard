@@ -34,10 +34,10 @@ export default function AIDigest({ tasks, clients }: Props) {
       <button
         onClick={generate}
         disabled={loading}
-        className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-all"
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${loading ? 'bg-indigo-400 text-white cursor-wait' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
       >
-        {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-        Weekly Digest
+        <Sparkles size={14} />
+        {loading ? 'Generating...' : 'Weekly Digest'}
       </button>
 
       {open && digest && (

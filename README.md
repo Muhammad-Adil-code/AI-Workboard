@@ -4,7 +4,7 @@
 
 > A production-ready Kanban board built for freelancers who manage multiple clients. Unlike every other AI Kanban tool (which manages AI coding agents), WorkBoard helps **you** manage your own work — with AI as your assistant.
 
-![WorkBoard Main Board](./public/screenshots/board.png)
+![WorkBoard — Full Kanban Board](./public/screenshots/board.png)
 
 ---
 
@@ -14,7 +14,7 @@ Every existing AI Kanban on GitHub is built for orchestrating AI coding agents (
 
 WorkBoard fills that gap:
 - Track tasks across clients in one board
-- Let AI estimate how long tasks take
+- Let AI estimate how long tasks will take
 - Let AI break complex tasks into subtasks
 - Get a weekly AI-generated digest of your productivity
 - Visualize your progress with real charts
@@ -23,49 +23,45 @@ WorkBoard fills that gap:
 
 ## Features
 
-### Kanban Board — Drag & Drop
-4 columns: **To Do → In Progress → Review → Done**. Drag tasks between columns. Real-time sync via Socket.IO — multiple people can view the same board simultaneously.
+### 🗂 Kanban Board — Drag & Drop
+4 columns: **To Do → In Progress → Review → Done**. Drag tasks between columns. Real-time sync via Socket.IO — multiple users see changes instantly.
 
-![Kanban Board](./public/screenshots/board.png)
+### 🤖 AI Task Breakdown
+Open any task → click **AI Breakdown**. GPT-4o-mini splits vague tasks into specific subtasks with checkboxes. A progress bar tracks completion right on the card.
 
----
-
-### AI Task Breakdown
-Open any task and click **AI Breakdown**. GPT-4o-mini splits your vague task into specific, actionable subtasks with checkboxes. A progress bar on the card tracks completion.
-
-![Task Detail with AI Breakdown](./public/screenshots/task-detail.png)
+![Task Detail with AI Subtasks](./public/screenshots/task-detail.png)
 
 ---
 
-### Add Task with AI Time Estimate
-When creating a task, click the ✨ button next to **Est. Hours**. AI reads your task title and description and returns an estimate with confidence level and reasoning.
+### ⏱ Add Task with AI Time Estimate
+Click the ✨ button next to **Est. Hours** when creating a task. AI returns an estimate with confidence level and reasoning — auto-fills the field.
 
-![Add Task Modal](./public/screenshots/add-task.png)
+![Add Task with AI Estimate](./public/screenshots/add-task.png)
 
 ---
 
-### Insights Dashboard
-Click **Insights** in the header. Switch between **Today / 3 Days / Week / Month** to see:
-- Task activity chart (created vs completed per day)
+### 📊 Insights Dashboard
+Click **Insights** in the header. Switch between **Today / 3 Days / Week / Month**:
+- Task activity area chart (created vs completed per day)
 - Status breakdown donut chart
 - Priority breakdown bar chart
-- Estimated vs actual hours per task
+- Estimated vs actual hours comparison
 
 ![Insights Dashboard](./public/screenshots/insights.png)
 
 ---
 
-### Weekly AI Digest
-Click **Weekly Digest** — AI reads all your tasks and returns a motivating summary with stats and 3 actionable suggestions for your week.
+### 💬 Weekly AI Digest
+Click **Weekly Digest** — AI reads all your tasks and returns stats, a motivating insight, and 3 actionable suggestions for your week.
 
-![Weekly Digest](./public/screenshots/digest.png)
+![Weekly AI Digest with Real AI Response](./public/screenshots/digest.png)
 
 ---
 
-### Client Management
-Track clients with invoice status (unpaid → sent → paid → overdue) and total earnings. Each task is linked to a client and color-coded on the board.
+### 👥 Client Management
+Track clients with invoice status (unpaid → sent → paid → overdue) and total earnings per client. Tasks are color-coded by client on the board.
 
-![Client Panel](./public/screenshots/clients.png)
+![Client Management Panel](./public/screenshots/clients.png)
 
 ---
 
