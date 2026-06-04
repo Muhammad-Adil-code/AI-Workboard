@@ -117,6 +117,11 @@ export function parseIntent(raw: string): Intent {
     return { type: 'confused' }
   }
 
+  // Weekly digest
+  if (/(weekly digest|week digest|this week|weekly update|week summary|weekly report|how was my week|how did i do this week)/.test(text)) {
+    return { type: 'get_summary' }
+  }
+
   // Summary
   if (/(summary|overview|how many tasks|board update|update me|what do i have|my tasks|board status)/.test(text)) {
     return { type: 'get_summary' }

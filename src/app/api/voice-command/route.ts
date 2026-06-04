@@ -9,10 +9,19 @@ async function execute(intent: Intent): Promise<string> {
 
   if (intent.type === 'greet') {
     const tasks = await Task.find({ boardId: 'default' })
-    const overdue = tasks.filter((t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done').length
-    const inProgress = tasks.filter((t: any) => t.status === 'in-progress').length
-    if (overdue > 0) return `Hey! You have ${tasks.length} tasks, ${inProgress} in progress, and ${overdue} overdue. Let's get to work!`
-    return `Hey! You have ${tasks.length} tasks and ${inProgress} in progress. Everything looks good!`
+    const overdue = tasks.filter((t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done')
+    const inProgress = tasks.filter((t: any) => t.status === 'in-progress')
+    const urgent = tasks.filter((t: any) => t.priority === 'urgent' && t.status !== 'done')
+    const hour = new Date().getHours()
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
+    let msg = `${greeting}! You have ${tasks.length} tasks total. `
+    if (inProgress.length > 0) msg += `${inProgress.length} in progress right now. `
+    if (overdue.length > 0) msg += `Heads up — ${overdue.length} task${overdue.length > 1 ? 's are' : ' is'} overdue. `
+    if (urgent.length > 0) msg += `${urgent.length} urgent task${urgent.length > 1 ? 's need' : ' needs'} your attention. `
+    if (overdue.length === 0 && urgent.length === 0) msg += `Everything is on track. `
+    msg += `How can I help you today?`
+    return msg
   }
 
   if (intent.type === 'how_are_you') {
@@ -60,13 +69,30 @@ async function execute(intent: Intent): Promise<string> {
   }
 
   if (intent.type === 'get_summary') {
-    const tasks = await Task.find({ boardId: 'default' })
-    const todo = tasks.filter(t => t.status === 'todo').length
-    const inProg = tasks.filter(t => t.status === 'in-progress').length
-    const review = tasks.filter(t => t.status === 'review').length
-    const done = tasks.filter(t => t.status === 'done').length
-    const overdue = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done').length
-    return `You have ${tasks.length} tasks total: ${todo} to do, ${inProg} in progress, ${review} in review, and ${done} done.${overdue > 0 ? ` Watch out — ${overdue} are overdue!` : ' No overdue tasks, great work!'}`
+    const tasks = await Task.find({ boardId: 'default' }).populate('clientId')
+    const clients = await Client.find()
+    const todo = tasks.filter((t: any) => t.status === 'todo')
+    const inProg = tasks.filter((t: any) => t.status === 'in-progress')
+    const review = tasks.filter((t: any) => t.status === 'review')
+    const done = tasks.filter((t: any) => t.status === 'done')
+    const overdue = tasks.filter((t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done')
+    const urgent = tasks.filter((t: any) => t.priority === 'urgent' && t.status !== 'done')
+
+    let summary = `Here's your board summary. You have ${tasks.length} tasks across ${clients.length} clients. `
+    summary += `${todo.length} to do, ${inProg.length} in progress, ${review.length} in review, and ${done.length} completed. `
+
+    if (inProg.length > 0) {
+      summary += `You're currently working on: ${inProg.map((t: any) => t.title).join(', ')}. `
+    }
+    if (urgent.length > 0) {
+      summary += `You have ${urgent.length} urgent task${urgent.length > 1 ? 's' : ''} that need attention: ${urgent.map((t: any) => t.title).join(', ')}. `
+    }
+    if (overdue.length > 0) {
+      summary += `Warning — ${overdue.length} task${overdue.length > 1 ? 's are' : ' is'} overdue: ${overdue.map((t: any) => t.title).join(', ')}.`
+    } else {
+      summary += `Great news — no overdue tasks!`
+    }
+    return summary
   }
 
   if (intent.type === 'get_overdue') {
