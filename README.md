@@ -65,11 +65,25 @@ Track clients with invoice status (unpaid → sent → paid → overdue) and tot
 
 ---
 
+### 🎤 Voice AI Assistant
+Click **Voice AI** to open a full voice interface floating over your dashboard. Speak naturally — the assistant understands commands, casual conversation, and multi-step task creation. **100% local, no API key required.**
+
+- *"Board summary"* → speaks your full task status
+- *"What's overdue?"* → reads out late tasks
+- *"Add a new task"* → AI guides you through title, priority, client, and due date
+- *"Move the first task to done"* → updates the board by voice
+- *"How are you?"* → fully conversational
+
+![Voice AI Assistant](./public/screenshots/voice.png)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 14 (App Router), React, Tailwind CSS |
+| Voice AI | Web Speech API (free, browser-native, no API key) |
 | Real-time | Socket.IO |
 | Backend | Node.js, Express (custom server) |
 | Database | MongoDB + Mongoose |
