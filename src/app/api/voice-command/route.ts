@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import Task from '@/models/Task'
 import Client from '@/models/Client'
-import { parseIntent, buildReply, Intent } from '@/lib/intentParser'
+import { parseIntent, Intent } from '@/lib/intentParser'
 
 async function execute(intent: Intent): Promise<string> {
   await connectDB()
@@ -57,7 +57,7 @@ async function execute(intent: Intent): Promise<string> {
       boardId: 'default',
       order: Date.now(),
     })
-    return buildReply(intent, '')
+    return `Done! I've added "${intent.title}" as a ${intent.priority} priority task.`
   }
 
   if (intent.type === 'update_status') {
@@ -67,6 +67,20 @@ async function execute(intent: Intent): Promise<string> {
     return `Done! I moved "${task.title}" to ${intent.status}.`
   }
 
+  if (intent.type === 'update_status_positional') {
+    const query: any = { boardId: 'default' }
+    if (intent.fromStatus) query.status = intent.fromStatus
+    else query.status = { $ne: 'done' }
+
+    const tasks = await Task.find(query).sort({ order: 1, createdAt: 1 })
+    if (!tasks.length) return `I could not find any tasks in that column.`
+
+    const idx = intent.position === -1 ? tasks.length - 1 : intent.position
+    const task = tasks[idx] || tasks[0]
+    await Task.findByIdAndUpdate(task._id, { status: intent.toStatus })
+    return `Done! I moved "${task.title}" to ${intent.toStatus}.`
+  }
+
   if (intent.type === 'update_priority') {
     const task = await Task.findOne({ title: new RegExp(intent.keyword, 'i'), boardId: 'default' })
     if (!task) return `I could not find a task matching "${intent.keyword}".`
@@ -74,7 +88,8 @@ async function execute(intent: Intent): Promise<string> {
     return `Done! "${task.title}" is now ${intent.priority} priority.`
   }
 
-  return "I'm not sure what you mean. Try saying: add task, board summary, what's overdue, or update a task."
+  const raw = (intent as any).raw || ''
+  return `I heard "${raw}" but I'm not sure what to do. Try saying: "move the first task to in progress", "board summary", "what's overdue", or "add task: title here".`
 }
 
 export async function POST(req: NextRequest) {
@@ -85,7 +100,7 @@ export async function POST(req: NextRequest) {
   const result = await execute(intent)
   const reply = intent.type === 'create_task' || intent.type === 'greet' ? result : result
 
-  const actionTypes = ['create_task', 'update_status', 'update_priority']
+  const actionTypes = ['create_task', 'update_status', 'update_status_positional', 'update_priority']
   const action = actionTypes.includes(intent.type) ? intent.type : null
 
   return NextResponse.json({ reply, action })

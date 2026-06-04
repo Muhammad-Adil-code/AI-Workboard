@@ -1,40 +1,52 @@
 export type Intent =
   | { type: 'create_task'; title: string; priority: string; tags: string[]; dueDays?: number }
   | { type: 'update_status'; keyword: string; status: string }
+  | { type: 'update_status_positional'; position: number; fromStatus: string | null; toStatus: string }
   | { type: 'update_priority'; keyword: string; priority: string }
   | { type: 'get_summary' }
   | { type: 'get_overdue' }
   | { type: 'get_in_progress' }
   | { type: 'get_client_tasks'; clientName: string }
   | { type: 'greet' }
-  | { type: 'unknown' }
+  | { type: 'unknown'; raw: string }
 
-const STATUS_MAP: Record<string, string> = {
-  'todo': 'todo', 'to do': 'todo', 'to-do': 'todo', 'backlog': 'todo',
-  'in progress': 'in-progress', 'in-progress': 'in-progress', 'working': 'in-progress', 'started': 'in-progress',
-  'review': 'review', 'testing': 'review', 'checking': 'review',
-  'done': 'done', 'finished': 'done', 'complete': 'done', 'completed': 'done', 'closed': 'done',
+export const STATUS_MAP: Record<string, string> = {
+  'todo': 'todo', 'to do': 'todo', 'to-do': 'todo', 'backlog': 'todo', 'to do column': 'todo',
+  'in progress': 'in-progress', 'in-progress': 'in-progress', 'progress': 'in-progress',
+  'progress column': 'in-progress', 'in progress column': 'in-progress',
+  'working': 'in-progress', 'started': 'in-progress', 'the progress': 'in-progress',
+  'review': 'review', 'testing': 'review', 'checking': 'review', 'review column': 'review',
+  'done': 'done', 'finished': 'done', 'complete': 'done', 'completed': 'done',
+  'closed': 'done', 'done column': 'done',
 }
 
-const PRIORITY_MAP: Record<string, string> = {
+export const PRIORITY_MAP: Record<string, string> = {
   'urgent': 'urgent', 'critical': 'urgent', 'asap': 'urgent', 'emergency': 'urgent',
   'high': 'high', 'important': 'high',
   'medium': 'medium', 'normal': 'medium', 'moderate': 'medium',
   'low': 'low', 'minor': 'low', 'later': 'low',
 }
 
-function matchPriority(text: string): string {
+const POSITION_MAP: Record<string, number> = {
+  'first': 0, '1st': 0, 'one': 0, 'second': 1, '2nd': 1, 'two': 1,
+  'third': 2, '3rd': 2, 'three': 2, 'fourth': 3, '4th': 3,
+  'last': -1, 'bottom': -1,
+}
+
+export function matchStatus(text: string): string | null {
+  // Try longest match first
+  const sorted = Object.keys(STATUS_MAP).sort((a, b) => b.length - a.length)
+  for (const word of sorted) {
+    if (text.includes(word)) return STATUS_MAP[word]
+  }
+  return null
+}
+
+export function matchPriority(text: string): string {
   for (const [word, p] of Object.entries(PRIORITY_MAP)) {
     if (text.includes(word)) return p
   }
   return 'medium'
-}
-
-function matchStatus(text: string): string | null {
-  for (const [word, s] of Object.entries(STATUS_MAP)) {
-    if (text.includes(word)) return s
-  }
-  return null
 }
 
 function extractDueDays(text: string): number | undefined {
@@ -49,7 +61,7 @@ function extractDueDays(text: string): number | undefined {
 
 function extractTags(text: string): string[] {
   const tagWords = ['design', 'frontend', 'backend', 'bug', 'feature', 'api', 'ui', 'ux',
-    'database', 'devops', 'testing', 'docs', 'mobile', 'performance', 'security', 'review']
+    'database', 'devops', 'testing', 'docs', 'mobile', 'performance', 'security']
   return tagWords.filter(t => text.includes(t))
 }
 
@@ -62,88 +74,92 @@ export function parseIntent(raw: string): Intent {
   }
 
   // Summary
-  if (/(summary|overview|status|how many tasks|board update|update me|what do i have|my tasks)/.test(text)) {
+  if (/(summary|overview|how many tasks|board update|update me|what do i have|my tasks|board status)/.test(text)) {
     return { type: 'get_summary' }
   }
 
   // Overdue
-  if (/(overdue|late|missed|past due|behind)/.test(text)) {
+  if (/(overdue|late|missed|past due|behind schedule)/.test(text)) {
     return { type: 'get_overdue' }
   }
 
-  // In progress
-  if (/(in progress|working on|current|active|ongoing)/.test(text)) {
+  // In progress — only if NOT a move command
+  if (/(what(?:'s| is) in progress|show.*in progress|what am i working on)/.test(text)) {
     return { type: 'get_in_progress' }
   }
 
   // Client tasks
-  const clientMatch = text.match(/(?:tasks? for|what(?:'s| is) ([\w\s]+) (?:working on|doing)|show ([\w\s]+) tasks?)/)
+  const clientMatch = text.match(/tasks? for ([\w\s]+?)(?:\s*$|\s+task|\s+work)/)
   if (clientMatch) {
-    const name = (clientMatch[1] || clientMatch[2] || '').trim()
-    if (name) return { type: 'get_client_tasks', clientName: name }
+    const name = clientMatch[1].trim()
+    if (name && name.length > 1) return { type: 'get_client_tasks', clientName: name }
   }
 
-  // Move/update status: "move X to done", "mark X as in progress", "set X to review"
-  const statusMatch = text.match(/(?:move|mark|set|put|change|update)\s+(?:the\s+)?(.+?)\s+(?:to|as)\s+(todo|to do|in progress|in-progress|review|done|finished|complete|completed|working)/)
-  if (statusMatch) {
-    const status = matchStatus(statusMatch[2])
-    if (status) return { type: 'update_status', keyword: statusMatch[1].trim(), status }
+  // ── Positional move: "move the first task to in progress"
+  // "move the second task in the to do column to the progress column"
+  const posKeys = Object.keys(POSITION_MAP).join('|')
+  const positionalReg = new RegExp(
+    `(?:move|put|send)\\s+(?:the\\s+)?(${posKeys})\\s+(?:task|one)?(?:[^]+?)?\\s+to\\s+(?:the\\s+)?(.+)`
+  )
+  const posMatch = text.match(positionalReg)
+  if (posMatch) {
+    const position = POSITION_MAP[posMatch[1]]
+    const toText = posMatch[2].trim()
+    const toStatus = matchStatus(toText)
+
+    // Try to detect fromStatus (e.g. "in the to do column")
+    const fromStatus = matchStatus(text.replace(toText, '')) // remove destination text
+
+    if (toStatus !== null) {
+      return { type: 'update_status_positional', position, fromStatus: fromStatus !== toStatus ? fromStatus : null, toStatus }
+    }
+  }
+
+  // ── Named move: "move the ShopZen task to done"
+  // Handle "move X [from Y] to Z" — strip column words from keyword
+  const statusWords = Object.keys(STATUS_MAP).join('|')
+  const namedMoveReg = new RegExp(
+    `(?:move|mark|set|put|change|update|send)\\s+(?:the\\s+)?(.+?)\\s+(?:to|as|into)\\s+(?:the\\s+)?(${statusWords})`
+  )
+  const namedMatch = text.match(namedMoveReg)
+  if (namedMatch) {
+    // Strip column/status words from keyword
+    let keyword = namedMatch[1]
+      .replace(/\b(column|task|in the|from the|from|the)\b/g, '')
+      .replace(new RegExp(`\\b(${statusWords})\\b`, 'g'), '')
+      .replace(/\s+/g, ' ').trim()
+    const status = STATUS_MAP[namedMatch[2]]
+    if (status && keyword.length > 0) {
+      return { type: 'update_status', keyword, status }
+    }
   }
 
   // Update priority: "make X urgent", "set X to high priority"
   const priorityMatch = text.match(/(?:make|set|mark|change|update)\s+(?:the\s+)?(.+?)\s+(?:to\s+)?(?:priority\s+)?(urgent|critical|high|important|medium|normal|low|minor)/)
   if (priorityMatch) {
-    return {
-      type: 'update_priority',
-      keyword: priorityMatch[1].trim(),
-      priority: PRIORITY_MAP[priorityMatch[2]] || 'medium',
-    }
+    const keyword = priorityMatch[1].replace(/\b(task|the)\b/g, '').trim()
+    return { type: 'update_priority', keyword, priority: PRIORITY_MAP[priorityMatch[2]] || 'medium' }
   }
 
-  // Create task: "add task X", "create task X", "new task X"
+  // Create task
   const createMatch = text.match(/(?:add|create|new|make)\s+(?:a\s+)?(?:new\s+)?task[:\s]+(.+)/)
   if (createMatch) {
     const rest = createMatch[1]
-    const priority = matchPriority(rest)
-    // Clean priority words from title
     const cleanTitle = rest
       .replace(/(urgent|critical|high|important|medium|normal|low|minor|priority)/g, '')
       .replace(/\s+/g, ' ').trim()
-    return {
-      type: 'create_task',
-      title: cleanTitle,
-      priority,
-      tags: extractTags(rest),
-      dueDays: extractDueDays(rest),
-    }
+    return { type: 'create_task', title: cleanTitle, priority: matchPriority(rest), tags: extractTags(rest), dueDays: extractDueDays(rest) }
   }
 
-  // "add" without "task" keyword — still try to create
   const addMatch = text.match(/^(?:add|create|new)\s+(.{5,})/)
   if (addMatch) {
     const rest = addMatch[1]
     return {
       type: 'create_task',
       title: rest.replace(/(urgent|critical|high|important|medium|normal|low|minor|priority)/g, '').trim(),
-      priority: matchPriority(rest),
-      tags: extractTags(rest),
-      dueDays: extractDueDays(rest),
+      priority: matchPriority(rest), tags: extractTags(rest), dueDays: extractDueDays(rest),
     }
   }
 
-  return { type: 'unknown' }
-}
-
-export function buildReply(intent: Intent, result: string): string {
-  switch (intent.type) {
-    case 'greet': return result
-    case 'create_task': return `Done! I've added "${(intent as any).title}" as a ${(intent as any).priority} priority task.`
-    case 'update_status': return `Got it. I moved the task to ${(intent as any).status}.`
-    case 'update_priority': return `Done! Priority updated to ${(intent as any).priority}.`
-    case 'get_summary': return result
-    case 'get_overdue': return result
-    case 'get_in_progress': return result
-    case 'get_client_tasks': return result
-    default: return result
-  }
+  return { type: 'unknown', raw }
 }
