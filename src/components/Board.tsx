@@ -9,6 +9,7 @@ import TaskDetailModal from './TaskDetailModal'
 import ClientPanel from './ClientPanel'
 import AIDigest from './AIDigest'
 import InsightsModal from './InsightsModal'
+import VoiceAssistant from './VoiceAssistant'
 import { Plus, LayoutDashboard, Users, BarChart2 } from 'lucide-react'
 import { useSocket } from '@/hooks/useSocket'
 
@@ -124,6 +125,7 @@ export default function Board() {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <VoiceAssistant onBoardChange={fetchTasks} />
             <AIDigest tasks={tasks} clients={clients} />
             <button
               onClick={() => setShowInsights(true)}
