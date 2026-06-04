@@ -66,10 +66,17 @@ function extractTags(text: string): string[] {
 }
 
 export function parseIntent(raw: string): Intent {
-  const text = raw.toLowerCase().trim()
+  // Strip filler/polite words from the beginning
+  const cleaned = raw
+    .toLowerCase()
+    .trim()
+    .replace(/^(hey|hi|hello|okay|ok|please|can you|could you|i want you to|i say|i said|would you|i need you to)[,\s]+/g, '')
+    .trim()
 
-  // Greet
-  if (/^(hey|hi|hello|good morning|good evening|howdy|what'?s up|sup)/.test(text)) {
+  const text = cleaned
+
+  // Greet — only if nothing meaningful follows
+  if (/^(hey|hi|hello|good morning|good evening|howdy|what'?s up|sup)\s*[!.?]?\s*$/.test(raw.toLowerCase().trim())) {
     return { type: 'greet' }
   }
 
@@ -95,41 +102,45 @@ export function parseIntent(raw: string): Intent {
     if (name && name.length > 1) return { type: 'get_client_tasks', clientName: name }
   }
 
+  // Normalize "into" → "to", "the progress column" → "in progress"
+  const normalized = text
+    .replace(/\binto\b/g, 'to')
+    .replace(/\bthe progress column\b/g, 'in progress')
+    .replace(/\bprogress column\b/g, 'in progress')
+    .replace(/\bto do column\b/g, 'todo')
+    .replace(/\breview column\b/g, 'review')
+    .replace(/\bdone column\b/g, 'done')
+    .replace(/\bthe in progress\b/g, 'in progress')
+
   // ── Positional move: "move the first task to in progress"
-  // "move the second task in the to do column to the progress column"
   const posKeys = Object.keys(POSITION_MAP).join('|')
   const positionalReg = new RegExp(
-    `(?:move|put|send)\\s+(?:the\\s+)?(${posKeys})\\s+(?:task|one)?(?:[^]+?)?\\s+to\\s+(?:the\\s+)?(.+)`
+    `(?:move|put|send|take)\\s+(?:the\\s+)?(${posKeys})\\s+(?:task|one)?(?:[\\w\\s,]+?)?\\s+(?:to|into)\\s+(?:the\\s+)?(.+)`
   )
-  const posMatch = text.match(positionalReg)
+  const posMatch = normalized.match(positionalReg)
   if (posMatch) {
     const position = POSITION_MAP[posMatch[1]]
     const toText = posMatch[2].trim()
     const toStatus = matchStatus(toText)
-
-    // Try to detect fromStatus (e.g. "in the to do column")
-    const fromStatus = matchStatus(text.replace(toText, '')) // remove destination text
-
+    const fromStatus = matchStatus(normalized.replace(posMatch[2], ''))
     if (toStatus !== null) {
       return { type: 'update_status_positional', position, fromStatus: fromStatus !== toStatus ? fromStatus : null, toStatus }
     }
   }
 
   // ── Named move: "move the ShopZen task to done"
-  // Handle "move X [from Y] to Z" — strip column words from keyword
   const statusWords = Object.keys(STATUS_MAP).join('|')
   const namedMoveReg = new RegExp(
-    `(?:move|mark|set|put|change|update|send)\\s+(?:the\\s+)?(.+?)\\s+(?:to|as|into)\\s+(?:the\\s+)?(${statusWords})`
+    `(?:move|mark|set|put|change|update|send|take)\\s+(?:the\\s+)?(?:task\\s+)?(.+?)\\s+(?:to|as|into|from\\s+\\w+\\s+to)\\s+(?:the\\s+)?(${statusWords})`
   )
-  const namedMatch = text.match(namedMoveReg)
+  const namedMatch = normalized.match(namedMoveReg)
   if (namedMatch) {
-    // Strip column/status words from keyword
     let keyword = namedMatch[1]
-      .replace(/\b(column|task|in the|from the|from|the)\b/g, '')
+      .replace(/\b(column|task|in the|from the|from|the|that|name|have|a|an)\b/g, '')
       .replace(new RegExp(`\\b(${statusWords})\\b`, 'g'), '')
       .replace(/\s+/g, ' ').trim()
     const status = STATUS_MAP[namedMatch[2]]
-    if (status && keyword.length > 0) {
+    if (status && keyword.length > 1) {
       return { type: 'update_status', keyword, status }
     }
   }
