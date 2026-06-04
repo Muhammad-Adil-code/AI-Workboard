@@ -117,10 +117,16 @@ async function execute(intent: Intent): Promise<string> {
   }
 
   if (intent.type === 'create_task') {
+    let clientId = undefined
+    if ((intent as any).clientName) {
+      const client = await Client.findOne({ name: new RegExp((intent as any).clientName, 'i') })
+      clientId = client?._id
+    }
     await Task.create({
       title: intent.title,
       priority: intent.priority,
       tags: intent.tags,
+      clientId,
       dueDate: intent.dueDays !== undefined ? new Date(Date.now() + intent.dueDays * 86400000) : undefined,
       status: 'todo',
       subtasks: [],
@@ -168,16 +174,131 @@ async function execute(intent: Intent): Promise<string> {
   return suggestions[tasks.length % suggestions.length]
 }
 
+function parsePriority(text: string): string | null {
+  const t = text.toLowerCase()
+  if (/(urgent|critical|asap)/.test(t)) return 'urgent'
+  if (/(high|important)/.test(t)) return 'high'
+  if (/(medium|normal|moderate)/.test(t)) return 'medium'
+  if (/(low|minor|later)/.test(t)) return 'low'
+  return null
+}
+
+function parseDueDays(text: string): number | undefined {
+  const t = text.toLowerCase()
+  if (t.includes('today')) return 0
+  if (t.includes('tomorrow')) return 1
+  if (t.includes('next week')) return 7
+  if (t.includes('this week')) return 4
+  const m = t.match(/(\d+)\s*days?/)
+  if (m) return parseInt(m[1])
+  return undefined
+}
+
 export async function POST(req: NextRequest) {
-  const { command } = await req.json()
+  const body = await req.json()
+  const { command, gather } = body
   if (!command?.trim()) return NextResponse.json({ reply: 'I did not catch that. Please try again.' })
 
+  await connectDB()
+  const clients = await Client.find()
+
+  // ── Multi-turn task creation flow ──
+  if (gather) {
+    const text = command.toLowerCase().trim()
+
+    // Step: collecting title
+    if (gather.step === 'title') {
+      const title = command.trim()
+      return NextResponse.json({
+        needsMore: true,
+        question: `Got it — "${title}". What priority should this be? Low, medium, high, or urgent?`,
+        gather: { step: 'priority', title },
+      })
+    }
+
+    // Step: collecting priority
+    if (gather.step === 'priority') {
+      const priority = parsePriority(text) || 'medium'
+      const clientNames = clients.map((c: any) => c.name.split(' ')[0]).join(', ')
+      return NextResponse.json({
+        needsMore: true,
+        question: `Priority set to ${priority}. Which client is this for?${clientNames ? ` You have: ${clientNames}.` : ''} Say "no client" to skip.`,
+        gather: { step: 'client', title: gather.title, priority },
+      })
+    }
+
+    // Step: collecting client
+    if (gather.step === 'client') {
+      let clientName: string | null = null
+      if (!/(no client|skip|none|no one|nobody)/.test(text)) {
+        const matched = clients.find((c: any) =>
+          text.includes(c.name.toLowerCase().split(' ')[0])
+        )
+        if (matched) clientName = (matched as any).name
+      }
+      return NextResponse.json({
+        needsMore: true,
+        question: clientName
+          ? `Got it, ${clientName}. When is this due? You can say "tomorrow", "next week", or "no due date".`
+          : `No client set. When is this due? Say "tomorrow", "next week", or "no due date".`,
+        gather: { step: 'due', title: gather.title, priority: gather.priority, clientName },
+      })
+    }
+
+    // Step: collecting due date — now create the task
+    if (gather.step === 'due') {
+      const dueDays = /(no due|no date|skip|none)/.test(text) ? undefined : parseDueDays(text)
+      let clientId = undefined
+      if (gather.clientName) {
+        const client = await Client.findOne({ name: new RegExp(gather.clientName, 'i') })
+        clientId = client?._id
+      }
+      await Task.create({
+        title: gather.title,
+        priority: gather.priority || 'medium',
+        clientId,
+        dueDate: dueDays !== undefined ? new Date(Date.now() + dueDays * 86400000) : undefined,
+        status: 'todo',
+        subtasks: [],
+        tags: [],
+        boardId: 'default',
+        order: Date.now(),
+      })
+      return NextResponse.json({
+        reply: `Done! I've added "${gather.title}" as a ${gather.priority} priority task${gather.clientName ? ` for ${gather.clientName}` : ''}. You can find it in the To Do column.`,
+        action: 'create_task',
+      })
+    }
+  }
+
+  // ── Check if user wants to create a task (trigger multi-turn) ──
   const intent = parseIntent(command)
+
+  if (intent.type === 'create_task') {
+    // If they gave full details in one shot (e.g. "add task: fix login bug, high priority") — create directly
+    if (intent.title && intent.title.length > 3) {
+      const result = await execute(intent)
+      return NextResponse.json({ reply: result, action: 'create_task' })
+    }
+    // Otherwise start the gathering flow
+    return NextResponse.json({
+      needsMore: true,
+      question: `Sure! What's the title of the new task?`,
+      gather: { step: 'title' },
+    })
+  }
+
+  // Vague "add task" / "new task" / "create task" without details
+  if (/(add|create|new|make)\s+(a\s+)?(new\s+)?task\s*$/.test(command.toLowerCase().trim())) {
+    return NextResponse.json({
+      needsMore: true,
+      question: `Of course! What's the title of the task?`,
+      gather: { step: 'title' },
+    })
+  }
+
   const result = await execute(intent)
-  const reply = intent.type === 'create_task' || intent.type === 'greet' ? result : result
-
-  const actionTypes = ['create_task', 'update_status', 'update_status_positional', 'update_priority']
+  const actionTypes = ['update_status', 'update_status_positional', 'update_priority']
   const action = actionTypes.includes(intent.type) ? intent.type : null
-
-  return NextResponse.json({ reply, action })
+  return NextResponse.json({ reply: result, action })
 }

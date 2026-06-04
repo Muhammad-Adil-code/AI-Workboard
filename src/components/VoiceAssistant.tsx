@@ -4,6 +4,13 @@ import { Mic, X } from 'lucide-react'
 
 type Phase = 'idle' | 'listening' | 'processing' | 'speaking'
 
+interface GatherState {
+  step: 'title' | 'priority' | 'client' | 'due'
+  title?: string
+  priority?: string
+  clientName?: string
+}
+
 interface Props {
   onBoardChange?: () => void
 }
@@ -16,6 +23,7 @@ export default function VoiceAssistant({ onBoardChange }: Props) {
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const hourlyRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const listeningAfterSpeak = useRef(false)
+  const gatherRef = useRef<GatherState | null>(null)
 
   // Init speech engines
   useEffect(() => {
@@ -92,12 +100,23 @@ export default function VoiceAssistant({ onBoardChange }: Props) {
       const res = await fetch('/api/voice-command', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command }),
+        body: JSON.stringify({ command, gather: gatherRef.current }),
       })
       const data = await res.json()
+
+      // Multi-turn task creation — AI is asking a follow-up question
+      if (data.needsMore) {
+        gatherRef.current = data.gather
+        speak(data.question)
+        return
+      }
+
+      // Task fully created or action completed
+      gatherRef.current = null
       if (data.action) onBoardChange?.()
       speak(data.reply || "I'm here to help.")
     } catch {
+      gatherRef.current = null
       speak("Sorry, something went wrong.")
     }
   }, [speak, stopAll, onBoardChange])
