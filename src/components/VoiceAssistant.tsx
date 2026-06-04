@@ -164,22 +164,22 @@ export default function VoiceAssistant({ onBoardChange }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'radial-gradient(ellipse at center, #2d1b69 0%, #0f0a1e 70%)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
 
-      {/* Close button */}
+      {/* Close button — top right, always clickable */}
       <button
         onClick={handleClose}
-        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all"
+        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white transition-all pointer-events-auto backdrop-blur-sm border border-white/10"
       >
         <X size={18} />
       </button>
 
-      {/* Center content */}
-      <div className="flex flex-col items-center gap-10">
+      {/* Center content — only this area captures pointer events */}
+      <div className="flex flex-col items-center gap-10 pointer-events-auto">
 
-        {/* Animation area */}
-        <div className="relative flex items-center justify-center w-48 h-48">
+        {/* Animation area — subtle glow behind mic only */}
+        <div className="relative flex items-center justify-center w-48 h-48"
+          style={{ filter: 'drop-shadow(0 0 60px rgba(139,92,246,0.5))' }}>
 
           {/* LISTENING — expanding pulse rings */}
           {phase === 'listening' && (
@@ -236,15 +236,17 @@ export default function VoiceAssistant({ onBoardChange }: Props) {
           </button>
         </div>
 
-        {/* Status text */}
+        {/* Status text — pill with blur background for readability over dashboard */}
         <div className="text-center mt-8">
-          <p className="text-white text-xl font-semibold tracking-wide">{statusText}</p>
-          <p className="text-violet-300/60 text-sm mt-2">
-            {phase === 'speaking' ? 'Tap mic to interrupt' :
-             phase === 'listening' ? 'Speak now...' :
-             phase === 'processing' ? 'Processing your request...' :
-             'Tap the mic and speak'}
-          </p>
+          <div className="inline-block px-6 py-3 rounded-2xl backdrop-blur-md bg-black/40 border border-white/10">
+            <p className="text-white text-lg font-semibold tracking-wide">{statusText}</p>
+            <p className="text-white/50 text-xs mt-1">
+              {phase === 'speaking' ? 'Tap mic to interrupt' :
+               phase === 'listening' ? 'Speak now...' :
+               phase === 'processing' ? 'Processing...' :
+               'Tap the mic and speak'}
+            </p>
+          </div>
         </div>
       </div>
 
